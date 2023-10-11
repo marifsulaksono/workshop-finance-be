@@ -80,7 +80,9 @@ func InsertNewTransaction() {
 	obj.Date = time.Now()
 
 	// call validate total expenses function
-	ValidateTotalExpenses(obj.UserId, obj.Amount, 100000)
+	if obj.Status == "out" {
+		ValidateTotalExpenses(obj.UserId, obj.Amount, 100000)
+	}
 
 	// statement execution query for inserting data
 	_, err := db.Exec("insert into transaction values (?,?,?,?,?)",
@@ -132,7 +134,9 @@ func UpdateTransaction() {
 	defer db.Close()
 
 	// call validate total expenses function
-	ValidateTotalExpenses(obj.UserId, obj.Amount, 100000)
+	if obj.Status == "out" {
+		ValidateTotalExpenses(obj.UserId, obj.Amount, 100000)
+	}
 
 	// statement execution query for updating data
 	_, err = db.Exec("update transaction set user_id=?, date=?, status=?, amount=? where id=?", &obj.UserId, &obj.Date, &obj.Status, &obj.Amount, obj.Id)
