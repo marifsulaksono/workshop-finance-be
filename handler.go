@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -25,7 +27,7 @@ func GetAllTransactions() {
 	// process scanning data row by row on table
 	for rows.Next() {
 		var obj = transaction{}
-		err := rows.Scan(&obj.Id, &obj.UserId, &obj.Date, &obj.Status, &obj.Amount)
+		err := rows.Scan(&obj.Id, &obj.UserId, &obj.Date, &obj.Status, &obj.Amount, &obj.Detail)
 		if err != nil {
 			fmt.Println(err.Error())
 			return
@@ -53,7 +55,7 @@ func GetTransactionById(id int) (transaction, error) {
 
 	// statement query for get row match and scan
 	err := db.QueryRow("select * from transaction where id = ?", id).
-		Scan(&obj.Id, &obj.UserId, &obj.Date, &obj.Status, &obj.Amount)
+		Scan(&obj.Id, &obj.UserId, &obj.Date, &obj.Status, &obj.Amount, &obj.Detail)
 	if err != nil {
 		return transaction{}, err
 	}
@@ -64,6 +66,7 @@ func GetTransactionById(id int) (transaction, error) {
 func InsertNewTransaction() {
 	// declaration new object
 	var obj transaction
+	sc := bufio.NewScanner(os.Stdin)
 
 	// form input
 	fmt.Print("Masukkan User ID : ")
@@ -72,6 +75,9 @@ func InsertNewTransaction() {
 	fmt.Scan(&obj.Status)
 	fmt.Print("Masukkan Jumlah : Rp. ")
 	fmt.Scan(&obj.Amount)
+	fmt.Print("Masukkan keterangan : ")
+	sc.Scan()
+	obj.Detail = sc.Text()
 
 	db := connect()
 	defer db.Close()
@@ -79,17 +85,17 @@ func InsertNewTransaction() {
 	// initial date value
 	obj.Date = time.Now()
 
-	// call validate total expenses function
-	if obj.Status == "out" {
-		ValidateTotalExpenses(obj.UserId, obj.Amount, 100000)
-	}
-
 	// statement execution query for inserting data
-	_, err := db.Exec("insert into transaction values (?,?,?,?,?)",
-		nil, &obj.UserId, &obj.Date, &obj.Status, &obj.Amount)
+	_, err := db.Exec("insert into transaction values (?,?,?,?,?,?)",
+		nil, &obj.UserId, &obj.Date, &obj.Status, &obj.Amount, &obj.Detail)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
+	}
+
+	// call validate total expenses function
+	if obj.Status == "out" {
+		ValidateTotalExpenses(obj.UserId, obj.Amount, 100000)
 	}
 
 	fmt.Println("Insert Success")
@@ -99,6 +105,7 @@ func UpdateTransaction() {
 	// declaration obj and date variable
 	var obj transaction
 	var date string
+	sc := bufio.NewScanner(os.Stdin)
 
 	// form ID input
 	fmt.Print("Masukkan ID : ")
@@ -116,13 +123,16 @@ func UpdateTransaction() {
 	fmt.Print("Masukkan User ID : ")
 	fmt.Scan(&obj.UserId)
 	fmt.Print("Masukkan Tanggal (2023-10-01) : ")
-	fmt.Scan(&date)
-	fmt.Scanln()
+	sc.Scan()
+	date = sc.Text()
 	fmt.Print("Masukkan Status (in/out) : ")
-	fmt.Scan(&obj.Status)
-	fmt.Scanln()
+	sc.Scan()
+	obj.Status = sc.Text()
 	fmt.Print("Masukkan Jumlah : Rp. ")
 	fmt.Scan(&obj.Amount)
+	fmt.Print("Masukkan Keterangan : ")
+	sc.Scan()
+	obj.Detail = sc.Text()
 
 	obj.Date, err = time.Parse("2006-01-02", date)
 	if err != nil {
@@ -133,16 +143,17 @@ func UpdateTransaction() {
 	db := connect()
 	defer db.Close()
 
-	// call validate total expenses function
-	if obj.Status == "out" {
-		ValidateTotalExpenses(obj.UserId, obj.Amount, 100000)
-	}
-
 	// statement execution query for updating data
-	_, err = db.Exec("update transaction set user_id=?, date=?, status=?, amount=? where id=?", &obj.UserId, &obj.Date, &obj.Status, &obj.Amount, obj.Id)
+	_, err = db.Exec("update transaction set user_id=?, date=?, status=?, amount=?, detail=? where id=?",
+		&obj.UserId, &obj.Date, &obj.Status, &obj.Amount, &obj.Detail, obj.Id)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
+	}
+
+	// call validate total expenses function
+	if obj.Status == "out" {
+		ValidateTotalExpenses(obj.UserId, 0, 100000)
 	}
 
 	fmt.Println("Update Success")

@@ -16,6 +16,7 @@ type transaction struct {
 	Date   time.Time
 	Status string
 	Amount int
+	Detail string
 }
 
 // this function is return db variable for database integration
