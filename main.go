@@ -36,11 +36,12 @@ listMenu:
 
 		fmt.Println("Aplikasi pencatatan keuangan")
 		fmt.Println("1. Lihat catatan")
-		fmt.Println("2. Tambah catatan")
-		fmt.Println("3. Update catatan")
-		fmt.Println("4. Hapus catatan")
+		fmt.Println("2. Lihat catatan by ID")
+		fmt.Println("3. Tambah catatan")
+		fmt.Println("4. Update catatan")
+		fmt.Println("5. Hapus catatan")
 		fmt.Println("0. Exit")
-		fmt.Print("Pilih (0-4) : ")
+		fmt.Print("Pilih (0-5) : ")
 		fmt.Scan(&selectedMenu)
 
 		switch selectedMenu {
@@ -49,10 +50,15 @@ listMenu:
 		case 1:
 			GetAllTransactions()
 		case 2:
-			InsertNewTransaction()
+			var id int
+			fmt.Print("Masukkan ID : ")
+			fmt.Scan(&id)
+			GetTransactionById(id)
 		case 3:
-			UpdateTransaction()
+			InsertNewTransaction()
 		case 4:
+			UpdateTransaction()
+		case 5:
 			DeleteTransaction()
 		default:
 			fmt.Println("Pilihan tidak valid")

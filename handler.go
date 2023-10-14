@@ -46,7 +46,7 @@ func GetAllTransactions() {
 }
 
 // Get transaction by id
-func GetTransactionById(id int) (transaction, error) {
+func GetTransactionById(id int) {
 	// declaration new object
 	var obj transaction
 
@@ -57,10 +57,11 @@ func GetTransactionById(id int) (transaction, error) {
 	err := db.QueryRow("select * from transaction where id = ?", id).
 		Scan(&obj.Id, &obj.UserId, &obj.Date, &obj.Status, &obj.Amount, &obj.Detail)
 	if err != nil {
-		return transaction{}, err
+		fmt.Println(err.Error())
+		return
 	}
 
-	return obj, nil
+	fmt.Println(obj)
 }
 
 func InsertNewTransaction() {
@@ -105,6 +106,7 @@ func UpdateTransaction() {
 	// declaration obj and date variable
 	var obj transaction
 	var date string
+	var err error
 	sc := bufio.NewScanner(os.Stdin)
 
 	// form ID input
@@ -112,13 +114,7 @@ func UpdateTransaction() {
 	fmt.Scan(&obj.Id)
 
 	// check the ID provided on database
-	result, err := GetTransactionById(obj.Id)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	fmt.Println(result)
+	GetTransactionById(obj.Id)
 
 	fmt.Print("Masukkan User ID : ")
 	fmt.Scan(&obj.UserId)
@@ -168,17 +164,13 @@ func DeleteTransaction() {
 	fmt.Scan(&id)
 
 	// check the ID provided on database
-	_, err := GetTransactionById(id)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	GetTransactionById(id)
 
 	db := connect()
 	defer db.Close()
 
 	// statement execution query for deleting data
-	_, err = db.Exec("delete from transaction where id=?", id)
+	_, err := db.Exec("delete from transaction where id=?", id)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -204,7 +196,6 @@ func ValidateTotalExpenses(userId, current, limit int) {
 
 	// suplement total plust current expenses
 	total += current
-	fmt.Println(total)
 
 	// limit validation
 	if total > limit {
