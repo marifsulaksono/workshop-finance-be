@@ -96,7 +96,7 @@ func InsertNewTransaction() {
 
 	// call validate total expenses function
 	if obj.Status == "out" {
-		ValidateTotalExpenses(obj.UserId, obj.Amount, 100000)
+		ValidateTotalExpenses(obj.UserId, 100000)
 	}
 
 	fmt.Println("Insert Success")
@@ -149,7 +149,7 @@ func UpdateTransaction() {
 
 	// call validate total expenses function
 	if obj.Status == "out" {
-		ValidateTotalExpenses(obj.UserId, 0, 100000)
+		ValidateTotalExpenses(obj.UserId, 100000)
 	}
 
 	fmt.Println("Update Success")
@@ -179,7 +179,7 @@ func DeleteTransaction() {
 	fmt.Println("Delete Success")
 }
 
-func ValidateTotalExpenses(userId, current, limit int) {
+func ValidateTotalExpenses(userId, limit int) {
 	// declaration total and date variable
 	var total int
 	var date = time.Now().Format("2006-01-02")
@@ -193,9 +193,6 @@ func ValidateTotalExpenses(userId, current, limit int) {
 	if err != nil {
 		fmt.Printf("Error count : %v", err)
 	}
-
-	// suplement total plust current expenses
-	total += current
 
 	// limit validation
 	if total > limit {
